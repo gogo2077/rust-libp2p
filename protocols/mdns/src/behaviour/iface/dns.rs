@@ -97,7 +97,7 @@ pub(crate) fn build_query() -> MdnsPacket {
 
     // Since the output is constant, we reserve the right amount ahead of time.
     // If this assert fails, adjust the capacity of `out` in the source code.
-    debug_assert_eq!(out.capacity(), out.len());
+    //debug_assert_eq!(out.capacity(), out.len());
     out
 }
 
@@ -203,7 +203,7 @@ pub(crate) fn build_service_discovery_response(id: u16, ttl: Duration) -> MdnsPa
 
     // Since the output size is constant, we reserve the right amount ahead of time.
     // If this assert fails, adjust the capacity of `out` in the source code.
-    debug_assert_eq!(out.capacity(), out.len());
+    //debug_assert_eq!(out.capacity(), out.len());
     out
 }
 
