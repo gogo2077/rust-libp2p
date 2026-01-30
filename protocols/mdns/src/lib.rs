@@ -84,8 +84,14 @@ static SERVICE_NAME_ONCE: OnceLock<Vec<u8>> = OnceLock::new();
 static SERVICE_NAME_FQDN_ONCE: OnceLock<String> = OnceLock::new();
 
 pub fn set_service_name(name: String) {
-    SERVICE_NAME_ONCE.set(name.as_bytes().to_vec()).unwrap();
-    SERVICE_NAME_FQDN_ONCE.set(name).unwrap();
+    // SERVICE_NAME = "_myapp._udp.local" (as bytes)
+    let service_name = format!("{}._udp.local", name).into_bytes();
+
+    // SERVICE_NAME_FQDN = "_myapp._udp.local." (with trailing dot)
+    let service_name_fqdn = format!("{}._udp.local.", name);
+
+    SERVICE_NAME_ONCE.set(service_name).unwrap();
+    SERVICE_NAME_FQDN_ONCE.set(service_name_fqdn).unwrap();
 }
 
 fn service_name() -> &'static [u8] {
