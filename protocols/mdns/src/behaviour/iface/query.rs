@@ -34,7 +34,7 @@ use libp2p_identity::PeerId;
 use libp2p_swarm::_address_translation;
 
 use super::dns;
-use crate::{META_QUERY_SERVICE_FQDN, SERVICE_NAME_FQDN};
+use crate::{META_QUERY_SERVICE_FQDN, service_name_fqdn};
 
 /// A valid mDNS packet received by the service.
 #[derive(Debug)]
@@ -61,7 +61,7 @@ impl MdnsPacket {
         if packet
             .queries()
             .iter()
-            .any(|q| q.name().to_utf8() == SERVICE_NAME_FQDN)
+            .any(|q| q.name().to_utf8() == service_name_fqdn())
         {
             return Ok(Some(MdnsPacket::Query(MdnsQuery {
                 from,
@@ -157,7 +157,7 @@ impl MdnsResponse {
             .answers()
             .iter()
             .filter_map(|record| {
-                if record.name().to_string() != SERVICE_NAME_FQDN {
+                if record.name().to_string() != service_name_fqdn() {
                     return None;
                 }
 
@@ -338,7 +338,7 @@ mod tests {
                 .answers()
                 .iter()
                 .filter_map(|record| {
-                    if record.name().to_utf8() != SERVICE_NAME_FQDN {
+                    if record.name().to_utf8() != service_name_fqdn() {
                         return None;
                     }
                     let RData::PTR(record_value) = record.data() else {

@@ -26,7 +26,7 @@ use libp2p_core::Multiaddr;
 use libp2p_identity::PeerId;
 use rand::{distributions::Alphanumeric, thread_rng, Rng};
 
-use crate::{META_QUERY_SERVICE, SERVICE_NAME};
+use crate::{service_name, META_QUERY_SERVICE};
 
 /// DNS TXT records can have up to 255 characters as a single string value.
 ///
@@ -89,7 +89,7 @@ pub(crate) fn build_query() -> MdnsPacket {
 
     // Our single question.
     // The name.
-    append_qname(&mut out, SERVICE_NAME);
+    append_qname(&mut out, service_name());
 
     // Flags.
     append_u16(&mut out, 0x0c);
@@ -195,8 +195,8 @@ pub(crate) fn build_service_discovery_response(id: u16, ttl: Duration) -> MdnsPa
 
     // Service name.
     {
-        let mut name = Vec::with_capacity(SERVICE_NAME.len() + 2);
-        append_qname(&mut name, SERVICE_NAME);
+        let mut name = Vec::with_capacity(service_name().len() + 2);
+        append_qname(&mut name, service_name());
         append_u16(&mut out, name.len() as u16);
         out.extend_from_slice(&name);
     }
@@ -222,7 +222,7 @@ fn query_response_packet(id: u16, peer_id: &[u8], records: &[Vec<u8>], ttl: u32)
 
     // Our single answer.
     // The name.
-    append_qname(&mut out, SERVICE_NAME);
+    append_qname(&mut out, service_name());
 
     // Flags.
     append_u16(&mut out, 0x000c);

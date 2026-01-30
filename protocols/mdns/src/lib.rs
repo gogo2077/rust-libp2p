@@ -36,6 +36,7 @@
 
 use std::{
     net::{Ipv4Addr, Ipv6Addr},
+    sync::OnceLock,
     time::Duration,
 };
 
@@ -44,10 +45,6 @@ mod behaviour;
 pub use crate::behaviour::tokio;
 pub use crate::behaviour::{Behaviour, Event};
 
-/// The DNS service name for all libp2p peers used to query for addresses.
-const SERVICE_NAME: &[u8] = b"_p2p._udp.local";
-/// `SERVICE_NAME` as a Fully Qualified Domain Name.
-const SERVICE_NAME_FQDN: &str = "_p2p._udp.local.";
 /// The meta query for looking up the `SERVICE_NAME`.
 const META_QUERY_SERVICE: &[u8] = b"_services._dns-sd._udp.local";
 /// `META_QUERY_SERVICE` as a Fully Qualified Domain Name.
@@ -79,4 +76,26 @@ impl Default for Config {
             enable_ipv6: false,
         }
     }
+}
+
+/// The DNS service name for all libp2p peers used to query for addresses.
+static SERVICE_NAME_ONCE: OnceLock<Vec<u8>> = OnceLock::new();
+/// `SERVICE_NAME` as a Fully Qualified Domain Name.
+static SERVICE_NAME_FQDN_ONCE: OnceLock<String> = OnceLock::new();
+
+pub fn set_service_name(name: String) {
+    SERVICE_NAME_ONCE.set(name.as_bytes().to_vec()).unwrap();
+    SERVICE_NAME_FQDN_ONCE.set(name).unwrap();
+}
+
+fn service_name() -> &'static [u8] {
+    SERVICE_NAME_ONCE
+        .get()
+        .expect("service_name not initialized")
+}
+
+fn service_name_fqdn() -> &'static str {
+    SERVICE_NAME_FQDN_ONCE
+        .get()
+        .expect("service_name_fqdn not initialized")
 }
