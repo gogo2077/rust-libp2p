@@ -83,6 +83,14 @@ static SERVICE_NAME_ONCE: OnceLock<Vec<u8>> = OnceLock::new();
 /// `SERVICE_NAME` as a Fully Qualified Domain Name.
 static SERVICE_NAME_FQDN_ONCE: OnceLock<String> = OnceLock::new();
 
+/// Sets the DNS service name used to isolate peer discovery for this process.
+///
+/// Call once before constructing an mDNS behaviour. The `._udp.local` suffix is added
+/// automatically.
+///
+/// # Panics
+///
+/// Panics if a service name has already been set.
 pub fn set_service_name(name: String) {
     // SERVICE_NAME = "_myapp._udp.local" (as bytes)
     let service_name = format!("{}._udp.local", name).into_bytes();
@@ -104,4 +112,10 @@ fn service_name_fqdn() -> &'static str {
     SERVICE_NAME_FQDN_ONCE
         .get()
         .expect("service_name_fqdn not initialized")
+}
+
+#[cfg(test)]
+fn init_test_service_name() {
+    static INIT: std::sync::Once = std::sync::Once::new();
+    INIT.call_once(|| set_service_name("_bb_upgrade_unit_test".to_owned()));
 }

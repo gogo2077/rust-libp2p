@@ -1,7 +1,119 @@
+## 0.50.0
+- Fix unbounded growth of per-peer `connected_peer.topics` from GRAFT control messages
+  ([GHSA-g3g5-x568-qvqx](https://github.com/libp2p/rust-libp2p/security/advisories/GHSA-g3g5-x568-qvqx)).
+  Backported from `libp2p-gossipsub v0.49.5`.
+
+- Change default `TopicSubscriptionFilter` from `AllowAllSubscriptionFilter` to `MaxCountSubscriptionFilter<AllowAllSubscriptionFilter>`
+  with default limits of `100` for both `max_subscribed_topics` and `max_subscriptions_per_request`,
+  providing built-in protection against excessive subscription requests.
+  See [PR 6527](https://github.com/libp2p/rust-libp2p/pull/6527).
+
+- Account for forwarded messages in `topic_mesg_sent_*` metrics.
+  See [PR 6502](https://github.com/libp2p/rust-libp2p/pull/6502)
+
+- Simplify gossipsub control message validation by scanning protobuf bytes before decoding
+  to validate cumulative control message size, rather than decoding then counting individual IDs
+  to prevent memory amplification from decoding.
+  Introduce `max_control_message_size` (default 16KB) to limit total control bytes in an RPC.
+  Rename `max_ihave_messages` to `max_ihave_messages_heartbeat`.
+  Rename `max_control_messages` to `max_control_messages_sent`.
+  See [PR #6486](https://github.com/libp2p/rust-libp2p/pull/6486)
+
+- Send all topic subscriptions in a single hello RPC when connecting to a new peer, aligning with the GossipSub spec and other implementations (Go, Nim, JS).
+  See [PR 6385](https://github.com/libp2p/rust-libp2p/pull/6385).
+
+- Raise MSRV to 1.88.0.
+  See [PR 6273](https://github.com/libp2p/rust-libp2p/pull/6273).
+
+- Revert migration to `quick-protobuf`, migrate back to `prost`.
+  See [PR 6363](https://github.com/libp2p/rust-libp2p/pull/6363).
+
+- Optimize IDONTWANT sending by avoiding broadcasts for already-seen messages and deduplicating recipient peers.
+  See [PR 6356](https://github.com/libp2p/rust-libp2p/pull/6356)
+
+- Rename metric `topic_msg_sent_bytes` to `topic_msg_last_sent_bytes` for accuracy.
+  See [PR 6283](https://github.com/libp2p/rust-libp2p/pull/6283)
+
+- Add extra metrics for bytes received and sent, filtered and unfiltered for each topic.
+  See [PR 6192](https://github.com/libp2p/rust-libp2p/pull/6192)
+
+- Reduce log size by implementing custom Debug for RawMessage that logs data length instead of full byte arrays.
+  See [PR 6263](https://github.com/libp2p/rust-libp2p/pull/6263)
+
+- Log when sending and receiving messages.
+  See [PR 6234](https://github.com/libp2p/rust-libp2p/pull/6234)
+
+- Prevent mesh exceeding mesh_n_high.
+  See [PR 6184](https://github.com/libp2p/rust-libp2p/pull/6184)
+
+- Fix underflow when shuffling peers after prunning.
+  See [PR 6183](https://github.com/libp2p/rust-libp2p/pull/6183)
+
+- Implement gossipsub 1.3 partial messages extension.
+  See [PR 6275](https://github.com/libp2p/rust-libp2p/pull/6275)
+
+- Remove peer penalty for duplicate messages.
+  See [PR 6112](https://github.com/libp2p/rust-libp2p/pull/6112)
+
+- Remove `Rpc` from the public API.
+  See [PR 6091](https://github.com/libp2p/rust-libp2p/pull/6091)
+
+- reduce allocations by replacing `or_insert` with `or_insert_with`
+  See [PR 6136](https://github.com/libp2p/rust-libp2p/pull/6136)
+
+- Fix `unsubscribe_backoff` expecting number of seconds instead of `Duration`
+  See [PR 6124](https://github.com/libp2p/rust-libp2p/pull/6124)
+
+- Fix incorrect default values in ConfigBuilder
+  See [PR 6113](https://github.com/libp2p/rust-libp2p/pull/6113)
+
+- Remove duplicated config `set_topic_max_transmit_size` method, prefer `max_transmit_size_for_topic`.
+  See [PR 6173](https://github.com/libp2p/rust-libp2p/pull/6173).
+
+- Switch the internal `async-channel` used to dispatch messages from `NetworkBehaviour` to the `ConnectionHandler`
+  with an internal priority queue. See [PR 6175](https://github.com/libp2p/rust-libp2p/pull/6175)
+
+- gossipsub: do early return in for an empty input
+  See [PR 6208](https://github.com/libp2p/rust-libp2p/pull/6208).
+
+- Refactor gossipsub with in-place negative-score peer removal.
+  See [PR 6209](https://github.com/libp2p/rust-libp2p/pull/6209).
+
+- Remove `wasm-bindgen` feature and make `wasm` support implicit.
+  See [PR 6102](https://github.com/libp2p/rust-libp2p/pull/6102)
+
+- Avoid direct casting from u128 to u64.
+  See [PR 6211](https://github.com/libp2p/rust-libp2p/pull/6211).
+
+## 0.49.4
+- Harden time arithmetic and bound remote PRUNE backoff.
+  See [CVE](https://github.com/libp2p/rust-libp2p/security/advisories/GHSA-xqmp-fxgv-xvq5)
+
+## 0.49.3
+- Ignore invalid backoff values on peer prune.
+  See [CVE GHSA-gc42-3jg7-rxr2](https://github.com/libp2p/rust-libp2p/security/advisories/GHSA-gc42-3jg7-rxr2)
+
+## 0.49.2
+
+- Relax `Behaviour::with_metrics` requirements, do not require DataTransform and TopicSubscriptionFilter to also impl Default
+  See [PR 6097](https://github.com/libp2p/rust-libp2p/pull/6097)
+
+## 0.49.1
+
+- Fix applying P3 and P6 Score penalties when their weight is zero
+  See [PR 6097](https://github.com/libp2p/rust-libp2p/pull/6097)
+
+- Fix fanout logic to include correctly scored peers and prevent panics when memcache is set to 0.
+  See [PR 6095](https://github.com/libp2p/rust-libp2p/pull/6095)
+
+- Fix mesh not being constructed even when not adding any peer.
+  See [PR 6100](https://github.com/libp2p/rust-libp2p/pull/6100)
+
 ## 0.49.0
 
 - Feature gate metrics related code. This changes some `Behaviour` constructor methods.
   See [PR 6020](https://github.com/libp2p/rust-libp2p/pull/6020)
+
 - Send IDONTWANT before Publishing a new message.
   See [PR 6017](https://github.com/libp2p/rust-libp2p/pull/6017)
 
